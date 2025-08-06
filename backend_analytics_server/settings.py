@@ -26,8 +26,9 @@ SECRET_KEY = 'django-insecure-7r^ksf2cdobpvxo3-8#%tntvjty_lhgxx67@k)9gj%6=0ls!a6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", 'https://localhost:8000']
 
 # Application definition
 
@@ -130,4 +131,11 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-API_URL = 'https://jsonplaceholder.typicode.com/posts'
+API_URL = 'https://dhamar.pythonanywhere.com/landing/api/index/?format=json'
+
+
+# Fallo: acceso sin autenticación
+LOGIN_URL = '/login/'
+
+# Éxito: luego de autenticación exitosa
+LOGIN_REDIRECT_URL = '/'
