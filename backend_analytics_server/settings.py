@@ -28,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-API_URL = 'https://jsonplaceholder.typicode.com/posts'
+API_URL = 'https://dhamar.pythonanywhere.com/landing/api/index/?format=json'
 
 # Application definition
 
