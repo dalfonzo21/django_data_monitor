@@ -32,6 +32,10 @@ CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000"]
 API_URL = 'https://dhamar.pythonanywhere.com/landing/api/index/?format=json'
 
 # Application definition
+# Fallo: acceso sin autenticación
+LOGIN_URL = '/login/'
+# Éxito: luego de autenticación exitosa
+LOGIN_REDIRECT_URL = '/'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
