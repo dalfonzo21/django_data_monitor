@@ -26,16 +26,11 @@ SECRET_KEY = 'django-insecure-&r$f05dz2aj_&_@b^z-p7+wmh_n3@7j_-#0eb3=)jdc&lh0h1b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000"]
+ALLOWED_HOSTS = []
 
 API_URL = 'https://dhamar.pythonanywhere.com/landing/api/index/?format=json'
 
 # Application definition
-# Fallo: acceso sin autenticación
-LOGIN_URL = '/login/'
-# Éxito: luego de autenticación exitosa
-LOGIN_REDIRECT_URL = '/'
 
 INSTALLED_APPS = [
     'django.contrib.admin',

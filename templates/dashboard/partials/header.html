@@ -35,11 +35,6 @@
                 </button>
             </li>
             <!-- Profile menu -->
-             {% if user.is_authenticated %}
-
-     <span>{{ user.username }}</span>
-
-  {% endif %}
             <li class="relative">
                 <button class="align-middle rounded-full focus:shadow-outline-purple focus:outline-none"
                     @click="toggleProfileMenu" @keydown.escape="closeProfileMenu" aria-label="Account"
@@ -59,11 +54,10 @@
                             <!-- START - Block Logout -->
 
                             <!-- Método post y action para el URL (con el alias 'logout') -->
-                                <form method="post" action="{% url 'logout' %}" class="w-full">
+                            <form class="w-full">
 
                                 <!-- CSRF token -->
-                                     {% csrf_token %}
-
+                                
                                 <button
                                     type="submit"
                                     class="inline-flex items-center w-full px-2 py-1 text-sm font-semibold transition-colors duration-150 rounded-md hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 dark:hover:text-gray-200">
