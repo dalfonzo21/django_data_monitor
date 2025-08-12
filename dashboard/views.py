@@ -2,6 +2,7 @@ from collections import Counter
 from datetime import datetime
 from django.shortcuts import render
 import requests
+from django.http import JsonResponse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 
@@ -15,8 +16,9 @@ def index(request):
     servicios = []
     customer_names = []
     citas_realizadas = 0
-    
     hoy = datetime.today().date()  # fecha actual sin hora
+    citas_por_fecha = {}  # Para el gráfico
+
     for key, value in posts.items():
         # Verificamos que sea un dict y tenga el campo 'service'
         if isinstance(value, dict) and 'service' in value:
@@ -29,6 +31,8 @@ def index(request):
                 fecha_cita = datetime.strptime(value['fecha'], '%Y-%m-%d').date()
                 if fecha_cita <= hoy:
                     citas_realizadas += 1
+                    fecha_str = fecha_cita.strftime('%Y-%m-%d')
+                    citas_por_fecha[fecha_str] = citas_por_fecha.get(fecha_str, 0) + 1
             except ValueError:
                 # Si la fecha no es válida o está mal formateada, la ignoramos
                 pass
@@ -56,3 +60,39 @@ def index(request):
         'citas_realizadas': citas_realizadas,
     }
     return render(request, 'dashboard/index.html', data)
+
+def datos_grafico(request):
+    """Función que devuelve datos para el gráfico"""
+    response = requests.get(settings.API_URL)
+    posts = response.json()
+    
+    citas_por_fecha = {}
+    
+    # Procesar los datos igual que en index()
+    for key, value in posts.items():
+        if isinstance(value, dict) and 'fecha' in value:
+            try:
+                fecha_cita = datetime.strptime(value['fecha'], '%Y-%m-%d').date()
+                fecha_str = fecha_cita.strftime('%Y-%m-%d')
+                citas_por_fecha[fecha_str] = citas_por_fecha.get(fecha_str, 0) + 1
+            except ValueError:
+                pass
+    
+    # Preparar datos para el gráfico
+    if citas_por_fecha:
+        # Ordenar fechas
+        fechas_ordenadas = sorted(citas_por_fecha.keys())
+        citas_counts = [citas_por_fecha[fecha] for fecha in fechas_ordenadas]
+        
+        # Para visitantes, usar una estimación simple: citas * 3
+        visitantes_counts = [citas * 3 for citas in citas_counts]
+    else:
+        fechas_ordenadas = []
+        citas_counts = []
+        visitantes_counts = []
+    
+    return JsonResponse({
+        "labels": fechas_ordenadas,
+        "citas": citas_counts,
+        "visitantes": visitantes_counts
+    })

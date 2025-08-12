@@ -43,7 +43,7 @@
         </div>
         <div>
           <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-          Servicio más solicitado
+            Servicio más solicitado
           </p>
           <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">
 
@@ -149,16 +149,52 @@
       </div>
       <!-- END - Datos -->
 
-      <!-- BEGIN - Gráficos -->
+      <!-- BEGIN - Gráfico de líneas -->
       <div class="row-span-1 grid gap-6 mb-8 md:grid-cols-12">
         <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
           <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
-            Título del gráfico
+            Métricas en tiempo real
           </h4>
-          <canvas id="line"></canvas>
+          <canvas id="lineChart"></canvas>
         </div>
       </div>
-      <!-- END - Gráficos -->
+      <!-- END - Gráfico de líneas -->
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          fetch('/datos-grafico/')
+            .then(response => response.json())
+            .then(data => {
+              var ctx = document.getElementById('lineChart').getContext('2d');
+              new Chart(ctx, {
+                type: 'line',
+                data: {
+                  labels: data.labels,
+                  datasets: [
+                    {
+                      label: 'Citas del día',
+                      data: data.citas,
+                      borderColor: 'rgba(75, 192, 192, 1)',
+                      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                      lineTension: 0.3
+                    },
+                    {
+                      label: 'Visitantes activos',
+                      data: data.visitantes,
+                      borderColor: 'rgba(255, 99, 132, 1)',
+                      backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                      lineTension: 0.3
+                    }
+                  ]
+                },
+                options: {
+                  responsive: true,
+                  legend: { position: 'top' }
+                }
+              });
+            });
+        });
+      </script>
 
     </div>
 
