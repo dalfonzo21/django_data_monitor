@@ -18,13 +18,20 @@ def index(request):
     citas_realizadas = 0
     hoy = datetime.today().date()  # fecha actual sin hora
     citas_por_fecha = {}  # Para el gráfico
+    tabla_respuestas = []
+    for key, value in posts.items():
+        if isinstance(value, dict):
+            nombre = value.get('name', '')
+            servicio = value.get('service', '')
+            if nombre or servicio:
+                tabla_respuestas.append({'name': nombre, 'service': servicio})
 
     for key, value in posts.items():
         # Verificamos que sea un dict y tenga el campo 'service'
         if isinstance(value, dict) and 'service' in value:
             servicios.append(value['service'].lower())
         if isinstance(value, dict) and 'name' in value:
-            customer_names.append(value['name'].lower())
+            customer_names.append(value['name'])
         # Contar citas realizadas (fecha <= hoy)
         if isinstance(value, dict) and 'fecha' in value:
             try:
@@ -55,9 +62,10 @@ def index(request):
     data = {
         'title': "Landing Page' Dashboard",
         'total_responses': total_responses,
-        'mas_solicitado': mas_solicitado.upper() if mas_solicitado else "No data available" ,
-        'mas_frecuente': mas_frecuente.upper() if mas_frecuente else "No data available",
+        'mas_solicitado': mas_solicitado.upper() if mas_solicitado else "No data available",
+        'mas_frecuente': mas_frecuente if mas_frecuente else "No data available",
         'citas_realizadas': citas_realizadas,
+        'tabla_respuestas': tabla_respuestas,  # <-- agrega esto
     }
     return render(request, 'dashboard/index.html', data)
 

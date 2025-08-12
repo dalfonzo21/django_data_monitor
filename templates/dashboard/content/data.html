@@ -113,27 +113,27 @@
             <thead>
               <tr
                 class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
-                <th class="px-4 py-3">Columna 1</th>
-                <th class="px-4 py-3">Columna 2</th>
+                <th class="px-4 py-3">Pacientes</th>
+                <th class="px-4 py-3">Servicio Requerido</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-
               <!-- START - respuestas -->
+              {% for fila in tabla_respuestas %}
               <tr class="text-gray-700 dark:text-gray-400">
                 <td class="px-4 py-3 text-sm">
                   <!-- START - fila.valor1 -->
-                  fila.valor1
+                  {{ fila.name }}
                   <!-- END - fila.valor1 -->
                 </td>
                 <td class="px-4 py-3 text-sm">
                   <!-- START - fila.valor2 -->
-                  fila.valor2
+                  {{ fila.service }}
                   <!-- END - fila.valor2 -->
                 </td>
               </tr>
+              {% endfor %}
               <!-- END - respuestas -->
-
             </tbody>
           </table>
         </div>
@@ -141,7 +141,7 @@
           class="grid px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase border-t dark:border-gray-700 bg-gray-50 sm:grid-cols-9 dark:text-gray-400 dark:bg-gray-800">
           <span class="flex items-center col-span-3">
             <!-- START - # total de respuestas -->
-            XXX
+            {{ total_responses }}
             <!-- END - # total de respuestas -->
             respuestas
           </span>
