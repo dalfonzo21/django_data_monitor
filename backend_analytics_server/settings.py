@@ -83,8 +83,12 @@ WSGI_APPLICATION = 'backend_analytics_server.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('MYSQLDATABASE', 'security'),
+        'USER': os.environ.get('MYSQLUSER', 'root'),
+        'PASSWORD': os.environ.get('MYSQLPASSWORD', 'admin'),
+        'HOST': os.environ.get('MYSQLHOST', 'localhost'),
+        'PORT': os.environ.get('MYSQLPORT'),
     }
 }
 
@@ -142,3 +146,4 @@ LOGIN_URL = '/login/'
 
 # Éxito: luego de autenticación exitosa
 LOGIN_REDIRECT_URL = '/'
+
