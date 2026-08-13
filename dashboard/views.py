@@ -11,8 +11,15 @@ from django.contrib.auth.decorators import login_required, permission_required
 @permission_required('dashboard.index_viewer', raise_exception=True)
 # Create your views here.
 def index(request):
-    response = requests.get(settings.API_URL)  # URL de la API
-    posts = response.json()  # Convertir la respuesta a JSON
+    try:
+        response = requests.get(settings.API_URL, timeout=5)  # URL de la API
+        response.raise_for_status()  # Lanza excepción si status != 2xx
+        posts = response.json()  # Convertir la respuesta a JSON
+    except requests.exceptions.RequestException as e:
+        # Si hay error en la solicitud, mostrar datos vacíos
+        print(f"Error al conectar con API: {e}")
+        posts = {}
+    
     # Número total de respuestas
     total_responses = len(posts)
     servicios = []
@@ -73,8 +80,13 @@ def index(request):
 
 def datos_grafico(request):
     """Función que devuelve datos para el gráfico"""
-    response = requests.get(settings.API_URL)
-    posts = response.json()
+    try:
+        response = requests.get(settings.API_URL, timeout=5)
+        response.raise_for_status()
+        posts = response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error al conectar con API: {e}")
+        posts = {}
     
     citas_por_fecha = {}
     

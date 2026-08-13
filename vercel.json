@@ -1,7 +1,8 @@
 {
-  "buildCommand": "pip install -r requirements.txt && python manage.py migrate && python manage.py create_default_user && python manage.py collectstatic --noreload",
+  "buildCommand": "pip install -r requirements.txt && python manage.py migrate && python manage.py create_default_user && python manage.py collectstatic --noinput",
   "outputDirectory": ".",
   "env": {
     "PYTHONUNBUFFERED": "1"
   }
 }
+
