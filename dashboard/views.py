@@ -6,18 +6,44 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import login_required, permission_required
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 @permission_required('dashboard.index_viewer', raise_exception=True)
 # Create your views here.
 def index(request):
+    api_available = True
+    api_error_msg = None
+    posts = {}
+    
     try:
-        response = requests.get(settings.API_URL, timeout=5)  # URL de la API
-        response.raise_for_status()  # Lanza excepción si status != 2xx
-        posts = response.json()  # Convertir la respuesta a JSON
-    except requests.exceptions.RequestException as e:
-        # Si hay error en la solicitud, mostrar datos vacíos
-        print(f"Error al conectar con API: {e}")
+        try:
+            response = requests.get(settings.API_URL, timeout=5)  # URL de la API
+            response.raise_for_status()  # Lanza excepción si status != 2xx
+            posts = response.json()  # Convertir la respuesta a JSON
+        except requests.exceptions.Timeout:
+            api_available = False
+            api_error_msg = "La API tardó demasiado en responder (timeout > 5s)"
+            logger.warning(f"API timeout: {settings.API_URL}")
+        except requests.exceptions.ConnectionError:
+            api_available = False
+            api_error_msg = "No se puede conectar con la API"
+            logger.warning(f"API connection error: {settings.API_URL}")
+        except requests.exceptions.HTTPError as e:
+            api_available = False
+            api_error_msg = f"Error HTTP en la API: {e.response.status_code}"
+            logger.warning(f"API HTTP error {e.response.status_code}: {settings.API_URL}")
+        except (requests.exceptions.RequestException, ValueError) as e:
+            api_available = False
+            api_error_msg = f"Error al obtener datos de la API: {str(e)}"
+            logger.warning(f"API error: {str(e)}")
+    except Exception as e:
+        # Catch-all para cualquier error inesperado
+        api_available = False
+        api_error_msg = "Error inesperado al procesar datos"
+        logger.exception(f"Unexpected error in index view: {str(e)}")
         posts = {}
     
     # Número total de respuestas
@@ -75,18 +101,36 @@ def index(request):
         'mas_frecuente': mas_frecuente if mas_frecuente else "No data available",
         'citas_realizadas': citas_realizadas,
         'tabla_respuestas': tabla_respuestas,  # <-- agrega esto
+        'api_available': api_available,
+        'api_error_msg': api_error_msg,
     }
     return render(request, 'dashboard/index.html', data)
 
 def datos_grafico(request):
     """Función que devuelve datos para el gráfico"""
+    posts = {}
     try:
         response = requests.get(settings.API_URL, timeout=5)
         response.raise_for_status()
         posts = response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error al conectar con API: {e}")
-        posts = {}
+    except (requests.exceptions.RequestException, ValueError) as e:
+        # Retornar datos vacíos en caso de error
+        logger.warning(f"API error in datos_grafico: {e}")
+        return JsonResponse({
+            "labels": [],
+            "citas": [],
+            "visitantes": [],
+            "error": True
+        })
+    except Exception as e:
+        # Catch-all general
+        logger.exception(f"Unexpected error in datos_grafico: {str(e)}")
+        return JsonResponse({
+            "labels": [],
+            "citas": [],
+            "visitantes": [],
+            "error": True
+        })
     
     citas_por_fecha = {}
     
