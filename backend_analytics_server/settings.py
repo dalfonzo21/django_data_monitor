@@ -158,7 +158,12 @@ USE_I18N = True
 USE_TZ = True
 
 # Sessions - usar cache en lugar de BD para Vercel
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+if os.environ.get('VERCEL'):
+    # Usar cookies firmadas para entornos serverless (no requiere base de datos ni memoria RAM del servidor)
+    SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+else:
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 SESSION_CACHE_ALIAS = 'default'
 
 # Cache - usar memoria en desarrollo, en-memoria en producción
