@@ -30,17 +30,27 @@ SECRET_KEY = 'django-insecure-&r$f05dz2aj_&_@b^z-p7+wmh_n3@7j_-#0eb3=)jdc&lh0h1b
 DEBUG = False
 CSRF_TRUSTED_ORIGINS = [
     "https://*.up.railway.app",
-  "https://*.app.github.dev", # Solo si utiliza Codespaces
-  "https://localhost:8000",
-  "http://127.0.0.1:8000"
+    "https://*.app.github.dev",
+    "https://localhost:8000",
+    "http://127.0.0.1:8000",
+    "https://*.vercel.app",
 ]
+
+# Soporte para Vercel: incluir VERCEL_URL si está disponible
+if os.environ.get('VERCEL_URL'):
+    CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ.get('VERCEL_URL')}")
 
 ALLOWED_HOSTS = [
     '.up.railway.app',
     'localhost',
     '127.0.0.1',
     '[::1]',
+    '.vercel.app',
 ]
+
+# Soporte para Vercel: incluir VERCEL_URL si está disponible
+if os.environ.get('VERCEL_URL'):
+    ALLOWED_HOSTS.append(os.environ.get('VERCEL_URL'))
 API_URL = 'https://dhamar.pythonanywhere.com/landing/api/index/?format=json'
 
 # Application definition
