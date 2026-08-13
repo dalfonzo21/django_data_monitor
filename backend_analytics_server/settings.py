@@ -27,18 +27,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-&r$f05dz2aj_&_@b^z-p7+wmh_n3@7j_-#0eb3=)jdc&lh0h1b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
 CSRF_TRUSTED_ORIGINS = [
     "https://*.up.railway.app",
     "https://*.app.github.dev",
     "https://localhost:8000",
     "http://127.0.0.1:8000",
     "https://*.vercel.app",
+    "http://localhost:*",
 ]
-
-# Soporte para Vercel: incluir VERCEL_URL si está disponible
-if os.environ.get('VERCEL_URL'):
-    CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ.get('VERCEL_URL')}")
 
 ALLOWED_HOSTS = [
     '.up.railway.app',
@@ -46,11 +44,16 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '[::1]',
     '.vercel.app',
+    '*',  # Permisivo en producción para evitar errores 400
 ]
 
-# Soporte para Vercel: incluir VERCEL_URL si está disponible
+# Soporte mejorado para Vercel: incluir VERCEL_URL si está disponible
 if os.environ.get('VERCEL_URL'):
-    ALLOWED_HOSTS.append(os.environ.get('VERCEL_URL'))
+    vercel_url = os.environ.get('VERCEL_URL').split(':')[0]  # Remover puerto si existe
+    if vercel_url not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(vercel_url)
+    if f"https://{vercel_url}" not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(f"https://{vercel_url}")
 API_URL = 'https://dhamar.pythonanywhere.com/landing/api/index/?format=json'
 
 # Application definition
@@ -78,6 +81,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'backend_analytics_server.middleware.DatabaseErrorMiddleware',  # Manejar errores de BD
 ]
 
 ROOT_URLCONF = 'backend_analytics_server.urls'
@@ -153,6 +157,18 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Sessions - usar cache en lugar de BD para Vercel
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
+# Cache - usar memoria en desarrollo, en-memoria en producción
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
@@ -169,3 +185,40 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'dashboard': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
